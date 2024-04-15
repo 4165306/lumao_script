@@ -17,7 +17,7 @@ export class Runner {
     //     const metamask = Metamask.getInstance(context)
     //     await metamask.unlock("qaz123123")
     // }
-    public static async main(browserIds: string[], procedure: Record<string, any>) {
+    public static async main(browserIds: string[], procedure: Record<string, any>, password: string) {
         for (let i = 0; i < browserIds.length; i ++) {
             // const r = await axios.post("http://127.0.0.1:54345/browser/open", {
             //     id: browserIds[i],
@@ -28,7 +28,7 @@ export class Runner {
             const ctx = c.contexts()[0]
             // 禁用插件
             ChromePlugin.disablePlugin(['nkbihfbeogaeaoehlefnkodbefgpgknn', 'phkbamefinggmakgklpkljjmgibohnba'], ctx)
-            // await OkxWallet.getInstance(ctx).unlock('qaz123123')
+            await OkxWallet.getInstance(ctx).unlock(password)
             const actions = {
                 uniswap: UniSwap.getInstance(ctx),
                 okxDex: OkxDex.getInstance(ctx),
