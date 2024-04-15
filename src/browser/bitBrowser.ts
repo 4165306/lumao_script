@@ -1,4 +1,4 @@
-import type {BrowserContext} from "@playwright/test";
+import { BrowserContext } from '@playwright/test';
 import axios from "axios";
 
 interface BrowserInfo {
@@ -12,7 +12,7 @@ export class BitBrowser {
     public static async openBrowser(id: string): Promise<BrowserInfo> {
         const r = await axios.post(host + '/browser/open', {id})
         const { http, ws } = r.data.data
-        console.log(http, ws)
+        console.log(r.data)
         return {
             http,
             ws

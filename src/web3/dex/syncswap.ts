@@ -88,7 +88,8 @@ export class Syncswap {
             // 输入gas的80% 
             await p.locator("#swap-input > div.row > input").fill((parseFloat(balance[0]) * 0.8).toFixed(5))
         } else {
-            await p.locator('#swap-input > div.col.gap-12 > div:nth-child(1) > div.row.gap-8.align.fade-in-mid > div').click()
+            await p.getByRole('button', {name: 'MAX'}).click()
+            // await p.locator('#swap-input > div.col.gap-12 > div:nth-child(1) > div.row.gap-8.align.fade-in-mid > div').click()
         }
         await p.waitForTimeout(1000)
         const swapButtons: Locator[] = [

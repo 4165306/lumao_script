@@ -1,5 +1,3 @@
-import { chromium } from "@playwright/test"
-import axios from "axios"
 import { UniSwap } from "./web3/dex/uniSwap"
 import { OkxDex } from "./web3/dex/okxDex"
 import { Pancake } from "./web3/dex/pancake"
@@ -8,6 +6,9 @@ import { Orca } from "./web3/dex/orca"
 import { Bungee } from "./web3/bridge/bungee"
 import { OkxWallet } from "./wallet/okxWallet"
 import { ChromePlugin } from "./browser/ChromePlugin"
+import { AdsBrowser } from "./browser/adsBrowser"
+import { BitBrowser } from "./browser/bitBrowser"
+import { chromium } from "@playwright/test"
 
 export class Runner {
 
@@ -17,17 +18,33 @@ export class Runner {
     //     const metamask = Metamask.getInstance(context)
     //     await metamask.unlock("qaz123123")
     // }
-    public static async main(browserIds: string[], procedure: Record<string, any>, password: string) {
+    public static async main(browserIds: string[], procedure: Record<string, any>, password: string, browserType: number) {
+        // let browserInstance = null 
+        // if (browserType === 1) {
+        //     browserInstance = AdsBrowser
+        // } else {
+        //     browserInstance = BitBrowser
+        // }
+        let http = ''
         for (let i = 0; i < browserIds.length; i ++) {
             // const r = await axios.post("http://127.0.0.1:54345/browser/open", {
             //     id: browserIds[i],
             // })
-            const r = await axios.get('http://127.0.0.1:50325/api/v1/browser/start?serial_number=' + browserIds[i])
-            const http = r.data.data.ws.selenium
-            const c = await chromium.connectOverCDP(`http://${http}`)
+            // @ts-ignore
+            if (browserType === 1) {
+                const info = await AdsBrowser.openBrowser(browserIds[i])
+                http = info.http
+            } else {
+                const info = await BitBrowser.openBrowser(browserIds[i])
+                http = info.ws
+            }
+            // const r = await axios.get('http://127.0.0.1:50325/api/v1/browser/start?serial_number=' + browserIds[i])
+            // const http = r.data.data.ws.selenium
+            console.log('http', http)
+            const c = await chromium.connectOverCDP(`${http}`)
             const ctx = c.contexts()[0]
             // 禁用插件
-            ChromePlugin.disablePlugin(['nkbihfbeogaeaoehlefnkodbefgpgknn', 'phkbamefinggmakgklpkljjmgibohnba'], ctx)
+            await ChromePlugin.disablePlugin(['nkbihfbeogaeaoehlefnkodbefgpgknn', 'phkbamefinggmakgklpkljjmgibohnba'], ctx)
             await OkxWallet.getInstance(ctx).unlock(password)
             const actions = {
                 uniswap: UniSwap.getInstance(ctx),

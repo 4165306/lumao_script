@@ -21,7 +21,7 @@ export function isGas(token: string): boolean {
     const upperTokens = token.toUpperCase()
     const r =  
         upperTokens === 'ETH' || upperTokens === "MATIC" || upperTokens === "BNB" || upperTokens === "APT" ||
-        upperTokens === 'STRK' || upperTokens === 'FTM' || upperTokens === 'AVAX'
+        upperTokens === 'STRK' || upperTokens === 'FTM' || upperTokens === 'AVAX' || upperTokens === 'ETHEREUM'
         return r
 }
 

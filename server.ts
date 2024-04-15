@@ -10,7 +10,8 @@ server.router('POST', '/__server/runScript', async (body: Record<string, any>) =
     const browserIds = body.browserIds
     const procedure = body.procedure
     const password = body.password
-    const handleResult = Runner.main(browserIds, procedure, password)
+    const browserType = body.browserType
+    const handleResult = Runner.main(browserIds, procedure, password, browserType)
     return {browserIds, procedure, handleResult}
 })
 
