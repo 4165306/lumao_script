@@ -5,7 +5,7 @@ const server = new HttpServer('./dist')
 server.router('GET', '/', async (query: Record<string, any>) => {
     return query
 })
-server.router('POST', '/runScript', async (body: Record<string, any>) => {
+server.router('POST', '/__server/runScript', async (body: Record<string, any>) => {
     console.log('body', body)
     const browserIds = body.browserIds
     const procedure = body.procedure
