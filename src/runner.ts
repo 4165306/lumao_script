@@ -22,7 +22,7 @@ export class Runner {
             // const r = await axios.post("http://127.0.0.1:54345/browser/open", {
             //     id: browserIds[i],
             // })
-            const r = await axios.get('http://192.168.2.132:50325/api/v1/browser/start?serial_number=' + browserIds[i])
+            const r = await axios.get('http://127.0.0.1:50325/api/v1/browser/start?serial_number=' + browserIds[i])
             const http = r.data.data.ws.selenium
             const c = await chromium.connectOverCDP(`http://${http}`)
             const ctx = c.contexts()[0]
