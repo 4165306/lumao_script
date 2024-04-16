@@ -1,5 +1,7 @@
 使用 typescript + playwright 实现自动化撸毛脚本
 
+命令行启动`ts-node server.ts` 然后打开`localhost:8080`,打开`指纹浏览器管理工具`即可
+
 目前支持情况
 
 &emsp;bit：
