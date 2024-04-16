@@ -33,9 +33,6 @@ export class Syncswap {
     }
 
     public async run(chain: ChainType, fromToken: string, toToken: string) {
-        this.context.on("page", () => {
-            OkxWallet.getInstance(this.context).confirm()
-        })
         if (fromToken.toUpperCase() === 'ETH'.toUpperCase()) {
             fromToken = 'Ethereum'
         }
@@ -44,26 +41,36 @@ export class Syncswap {
         }
         const p = await this.context.newPage()
         await p.goto('https://syncswap.xyz')
-        this.context.on("page", () => {
-            OkxWallet.getInstance(this.context).confirm()
+        while(true) {
+            this.context.on("page", async () => {
+                await OkxWallet.getInstance(this.context).confirm()
+            })
+            // 尝试连接钱包
+            await p.getByRole('button', {name: "Connect"}).click({timeout: 1000}).catch(() => {})
+            // await 尝试确认钱包
+            await p.getByText('OKX Wallet').click({timeout: 1000}).catch(() => {})
+            // 稍等2秒
+            await p.waitForTimeout(2000)
+            // 尝试切换网络
+            await p.getByRole('button', {name: "Switch"}).click({timeout: 1000}).catch(() => {})
+            // 尝试确认切换网络
+            await p.getByRole('button', {name: 'Switch Network'}).click().catch(() => {})
+            // 尝试切换链
+            const currentChainImage = await p.locator('#navi-tool > div.relative > div > button > div > div:nth-child(1) > div > img').getAttribute('src')
+            if (currentChainImage?.toUpperCase().indexOf(chain.toUpperCase()) === -1) {
+                // 没选对链，执行选链
+                await p.locator('//*[@id="navi-tool"]/div[1]/div/button').click({timeout: 1000}).catch(() => {})
+                await p.getByRole('button', {name: chain}).click({timeout: 1000}).catch(() => {})
+            }
+            let _t = await p.getByRole('button', {name: '0x'}).count().catch(() => 0)
+            console.log('连接成功', _t)
+            if (_t > 0) {
+                break
+            }
+        }
+        this.context.on("page", async () => {
+            await OkxWallet.getInstance(this.context).confirm()
         })
-        let _id = await Promise.race([
-            p.getByRole('button', { name: 'Connect' }).click().then(() => 1),
-            p.getByRole('button', {name: 'Switch'}).click().then(() => 2),
-            p.getByRole('button', {name: 'ETH'}).waitFor().then(() => 2)
-        ])
-        if (_id === 1) {
-            await p.getByText("OKX Wallet").click()
-        }
-        // 等待连接成功
-        _id = await Promise.race([
-            p.getByRole('button', {name: 'Switch'}).click().then(() => 1),
-            p.getByRole('button', {name: 'ETH'}).waitFor().then(() => 2)
-        ])
-        if (_id === 1) {
-            await p.getByRole('button', {name: 'Switch Network'}).click()
-            await p.getByRole('button', {name: 'ETH'}).waitFor()
-        }
         // 选择第一个币
         const currentFromToken = await p.locator('#swap-input > div.row > div > div > div.row.align > p').innerText()
         if (currentFromToken.toUpperCase().indexOf(fromToken.toUpperCase()) === -1) {
@@ -88,7 +95,7 @@ export class Syncswap {
             // 输入gas的80% 
             await p.locator("#swap-input > div.row > input").fill((parseFloat(balance[0]) * 0.8).toFixed(5))
         } else {
-            await p.getByRole('button', {name: 'MAX'}).click()
+            await p.getByRole('button', {name: '100%'}).click()
             // await p.locator('#swap-input > div.col.gap-12 > div:nth-child(1) > div.row.gap-8.align.fade-in-mid > div').click()
         }
         await p.waitForTimeout(1000)
@@ -129,7 +136,8 @@ export class Syncswap {
         await p.waitForTimeout(3000)
         await p.locator(".token-selector-currencies > div:first-child").click()
         await p.waitForTimeout(1000)
-        await p.locator("body").click()
+        await p.locator("body").click({timeout: 3000}).catch(() => {})
+        await p.locator('//*[@id="toolbox"]/div/div[1]/div[2]').click({timeout: 3000}).catch(() => {})
     }
 
     public async getFromTokenBalance(p: Page) {

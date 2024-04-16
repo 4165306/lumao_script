@@ -20,8 +20,14 @@ export class OkxWallet {
         await BitBrowser.keepOnePage(this.context)
         const p = await this.context.newPage()
         await p.goto("chrome-extension://mcohilncbfahbmgdjkbpemcciiolgcge/popup.html#unlock")
-        await p.locator(".okui-input-input").fill(password)
-        await p.getByText("解锁").click()
+        const _id = await Promise.race([
+            p.locator(".okui-input-input").fill(password).then(() => 1),
+            await p.locator('#home-page-root-element-id').waitFor().then(() => 2)
+        ])
+        if (_id === 1) {
+            await p.getByText("解锁").click()
+        }
+        await p.locator('#home-page-root-element-id').waitFor()
         await p.waitForTimeout(3000)
         await p.close()
     }
