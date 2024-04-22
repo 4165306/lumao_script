@@ -1,0 +1,7 @@
+{
+    "bin": "./server.js",  
+    "pkg": {
+        "scripts": "server.js"
+    },
+    "name": "lumao"
+}

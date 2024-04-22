@@ -1,7 +1,7 @@
 import { BrowserContext, Page } from "@playwright/test"
 import { ChainType, TokenTypes } from "../../types/tokenType"
 import { OkxWallet } from "../../wallet/okxWallet"
-import { getGasToken } from "../../helper/tokenHelper"
+import { getGasToken, isGas } from "../../helper/tokenHelper"
 import { PlaywrightHelper } from "../../helper/playwrightHelper"
 
 const chainMapping: Record<ChainType, string> = {
@@ -32,7 +32,7 @@ export class Pancake {
         return Pancake.instance
     }
 
-    public async run(chain: ChainType, fromToken: TokenTypes, toToken: TokenTypes) {
+    public async run(chain: string, fromToken: TokenTypes, toToken: TokenTypes) {
         const p = await this.context.newPage()
         await p.goto("https://pancakeswap.finance/swap")
         this.context.on('page', () => {
@@ -44,8 +44,9 @@ export class Pancake {
         ])
         console.log("判断idx", idx)
         if (idx === 0) {
-            p.locator('#swap-page').getByRole('button', { name: 'Connect Wallet' }).click(),
-            p.getByText('Metamask', { exact: true })
+            p.locator('#swap-page').getByRole('button', { name: 'Connect Wallet' }).click()
+            await p.waitForTimeout(1500)
+            p.getByText('Metamask', { exact: true }).click()
         }
         // 判断连接成功的标识
         await p.locator('div[title^="0x"]').waitFor()
@@ -55,12 +56,12 @@ export class Pancake {
         if (currentFromToken.toUpperCase() !== fromToken.toUpperCase()) {
             // 选币
             await p.locator('#pair').nth(0).click()
-            this.selectToken(fromToken,p)
+            await this.selectToken(fromToken,p)
         }
         const balanceNode = await p.locator('div[data-dd-action-name="Token balance"]').first().innerText()
         const balances = balanceNode.match(/\b\d+(\.\d+)?\b/) as RegExpMatchArray
         const balance = parseFloat(balances[0])
-        if (getGasToken(chain) === fromToken) {
+        if (isGas(fromToken)) {
             if (balance < 0.003) {
                 console.log("gas余额不足，不执行")
                 return
@@ -87,17 +88,22 @@ export class Pancake {
         console.log("success")
     }
 
-    private async selectNetwork(chain: ChainType, p: Page) {
+    private async selectNetwork(chain: string, p: Page) {
         await p.locator('#__next > div.sc-jQXlCi.ddheVu._1a5xov70._1qhetbf15c._1qhetbf16k > div.sc-fcdPlE.gCfBQK > nav > div.sc-eDnVMP.sc-gKHVLF.crHFAV.cDDWNX > div:nth-child(5) > div > div.sc-eDnVMP.sc-gKHVLF.sc-fHKCsJ.gkVgsf.UlmxL.bPFNQT').hover()
         await p.waitForTimeout(1000)
-        await p.getByRole("button", {name: chainMapping[chain]}).click({ force: true })
+        await p.getByRole("button", {name: chain}).click({ force: true })
     }
 
     private async selectToken(token: TokenTypes, p: Page) {
         // 选币
-        await p.locator('#token-search-input').fill(token)
+        await p.getByPlaceholder('Search name or paste address').fill(token)
         await p.waitForTimeout(3000)
-        await p.locator("#portal-root > div > div > div.sc-hLclGa.sc-fEyylQ.sc-lirSmk.kkKarq.cBDyZR.LbaFz > div.sc-eDnVMP.sc-gKHVLF.sc-fnOeiS.sc-cuGlHX.gkVgsf.UlmxL.jaVbxd.dWxNOu > div.sc-eDnVMP.cTpFRg > div > div > div:nth-child(1)").click()
-        await p.locator('#portal-root > div > div > div.sc-hLclGa.sc-fEyylQ.sc-lirSmk.kkKarq.cBDyZR.LbaFz > div.sc-eDnVMP.sc-gKHVLF.sc-ksJisA.gkVgsf.UlmxL.gdfwyx > button').click()
+        await p.locator('//*[@id="portal-root"]/div/div/div[2]/div[2]/div[2]/div/div/div[1]').click()
+        await p.waitForTimeout(3000)
+        try {
+            await p.locator('//*[@id="portal-root"]/div/div/div[2]/div[1]/button').click({timeout: 3000})
+        }catch(e) {
+
+        }
     }
 }

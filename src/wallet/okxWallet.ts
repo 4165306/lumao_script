@@ -22,7 +22,7 @@ export class OkxWallet {
         await p.goto("chrome-extension://mcohilncbfahbmgdjkbpemcciiolgcge/popup.html#unlock")
         const _id = await Promise.race([
             p.locator(".okui-input-input").fill(password).then(() => 1),
-            await p.locator('#home-page-root-element-id').waitFor().then(() => 2)
+            p.locator('#home-page-root-element-id').waitFor().then(() => 2)
         ])
         if (_id === 1) {
             await p.getByText("解锁").click()

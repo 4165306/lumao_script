@@ -17,6 +17,21 @@ class ContextManager {
             delete this.contexts[url];
         }
     }
+
+    public async KeepOnePage(ctx: BrowserContext) {
+        const pages = ctx.pages()
+        let i = 0
+        try {
+            while(pages.length > 2) {
+                console.log(pages[i].url())
+                await pages[i].close()
+                ++i
+            }
+        }catch(e) {
+
+        }
+        
+    }
 }
 
 const BrowserContextManager = new ContextManager();

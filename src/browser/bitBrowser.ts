@@ -11,6 +11,7 @@ const host = 'http://127.0.0.1:54345'
 export class BitBrowser {
     public static async openBrowser(id: string): Promise<BrowserInfo> {
         const r = await axios.post(host + '/browser/open', {id})
+        console.log(r.data.data)
         const { http, ws } = r.data.data
         console.log(r.data)
         return {

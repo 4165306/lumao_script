@@ -17,9 +17,8 @@
     "axios": "^1.6.8"
   },
   "pkg": {
-    "scripts": "server.js",
-    "targets": [
-      "node20"
-    ]
+    "scripts":["./**/*.js"],
+    "assets":["./dist"],
+    "outputPath": "build"
   }
 }

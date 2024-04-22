@@ -1,0 +1,15 @@
+{
+    "name": "my-static-website",
+    "version": "1.0.0",
+    "scripts": {
+      "start": "node server.js"
+    },
+    "pkg": {
+      "scripts": "dist/**/*.html dist/**/*.css dist/**/*.js"
+    },
+    "dependencies": {
+        "@playwright/test": "^1.42.1",
+        "@types/node": "^20.12.2"
+    }
+  }
+  

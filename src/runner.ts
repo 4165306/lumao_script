@@ -9,6 +9,7 @@ import { ChromePlugin } from "./browser/ChromePlugin"
 import { AdsBrowser } from "./browser/adsBrowser"
 import { BitBrowser } from "./browser/bitBrowser"
 import { chromium } from "@playwright/test"
+import { BrowserContextManager } from "./browser/playwright"
 
 export class Runner {
 
@@ -43,6 +44,8 @@ export class Runner {
             console.log('http', http)
             const c = await chromium.connectOverCDP(`${http}`)
             const ctx = c.contexts()[0]
+            BrowserContextManager.KeepOnePage(ctx)
+            
             // 禁用插件
             await ChromePlugin.disablePlugin(['nkbihfbeogaeaoehlefnkodbefgpgknn', 'phkbamefinggmakgklpkljjmgibohnba'], ctx)
             await OkxWallet.getInstance(ctx).unlock(password)

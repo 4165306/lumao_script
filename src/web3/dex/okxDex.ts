@@ -1,5 +1,6 @@
 import { BrowserContext, Page } from "@playwright/test"
 import { OkxWallet } from "../../wallet/okxWallet"
+import { isGas } from "../../helper/tokenHelper"
 
 export class OkxDex {
 
@@ -33,22 +34,25 @@ export class OkxDex {
             await p.locator('#scroll-box').getByRole('button', { name: '连接钱包' }).click()
             await p.locator('.address-drop-container').waitFor({timeout: 30000})
         }
-
+        await p.waitForTimeout(1000)
         await p.locator('div[data-monitor="chain"]').getByText("从").click()
         console.log('选择链')
         // 选择chain
         await p.getByTestId('moreChains').click()
         await p.getByPlaceholder("搜索", { exact: true }).fill(chain)
+        await p.waitForTimeout(3000)
         await p.locator('.index_supported-chains__Na8BT > div').nth(0).click()
+        await p.waitForTimeout(1500)
         console.log('选择fromToken')
         // 选择来源币
         await this.selectToken(fromToken, p)
         console.log("选择目标币")
         // 选择目标币
         await p.locator('div[data-monitor="chain"]').getByText("到").click()
+        await p.waitForTimeout(1500)
         await this.selectToken(toToken, p)
         const fromTokenUpperCase = fromToken.toUpperCase()
-        if (fromTokenUpperCase === 'ETH' || fromTokenUpperCase === 'MATIC' || fromTokenUpperCase === 'BNB' || fromToken === 'AVAX') {
+        if (isGas(fromTokenUpperCase)) {
             console.log('gas币')
             const balance = await this.getBalance(p)
             if (balance < 0.003) {
