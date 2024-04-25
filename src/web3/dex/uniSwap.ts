@@ -1,6 +1,6 @@
 import type {BrowserContext, Page} from "@playwright/test";
 import {OkxWallet} from "../../wallet/okxWallet";
-import { getGasToken } from "../../helper/tokenHelper";
+import { getGasToken, isGas } from "../../helper/tokenHelper";
 import { ChainType, TokenTypes } from "../../types/tokenType";
 
 export class UniSwap {
@@ -60,7 +60,7 @@ export class UniSwap {
         this.context.on('page', async () => {
             await okxWallet.confirm()
         })
-        if (fromToken === getGasToken(chain)) {
+        if (isGas(fromToken)) {
             const balance = await this.getBalance(p)
             if (balance < 0.003) {
                 console.log("金额小于0.003, 不执行交互")
@@ -68,7 +68,7 @@ export class UniSwap {
             }
             await p.locator("#swap-currency-input").locator("input").fill((balance * 0.8).toFixed(5))
         } else {
-            await p.getByText("总余额").click()
+            await p.getByRole("button", {name: "最大值"}).click()
         }
         // 检测交换|批准并交换按钮
         await p.waitForSelector('#swap-button')
@@ -76,10 +76,9 @@ export class UniSwap {
         // 等待交换结果信息
         await p.locator('#confirm-swap-or-send').click()
         console.log("持续监测是否交换成功")
-        await p.getByTestId("pending-modal-content-title").waitFor({
+        await p.getByText("兑换成功！").waitFor({
             timeout: 60000
         })
-        console.log("执行结束")
         return
     }
 
